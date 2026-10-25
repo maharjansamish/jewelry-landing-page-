@@ -50,7 +50,15 @@ function createMailer() {
 }
 
 async function appendToSheet(order) {
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n");
+  let stage = "authenticate";
+  try {
+  // Vercel accepts keys pasted with escaped newlines or real line breaks.
+  // Normalize both forms and remove accidental wrapping quotes/CRLFs.
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY
+    .trim()
+    .replace(/^([\"'])|([\"'])$/g, "")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n");
   const auth = new google.auth.JWT({
     email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     key: privateKey,
@@ -58,20 +66,24 @@ async function appendToSheet(order) {
   });
   const sheets = google.sheets({ version: "v4", auth });
   const tab = process.env.GOOGLE_SHEET_TAB_NAME.replace(/'/g, "''");
+  stage = "open spreadsheet";
   const spreadsheet = await sheets.spreadsheets.get({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
     fields: "sheets.properties.title",
   });
   const hasTab = spreadsheet.data.sheets?.some((sheet) => sheet.properties?.title === process.env.GOOGLE_SHEET_TAB_NAME);
   if (!hasTab) {
+    stage = "create worksheet tab";
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       requestBody: { requests: [{ addSheet: { properties: { title: process.env.GOOGLE_SHEET_TAB_NAME } } }] },
     });
   }
   const headerRange = `'${tab}'!A1:N1`;
+  stage = "read worksheet header";
   const currentHeader = await sheets.spreadsheets.values.get({ spreadsheetId: process.env.GOOGLE_SHEET_ID, range: headerRange });
   if (!currentHeader.data.values?.length) {
+    stage = "initialize worksheet header";
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: headerRange,
@@ -80,6 +92,7 @@ async function appendToSheet(order) {
     });
     const sheetId = spreadsheet.data.sheets?.find((sheet) => sheet.properties?.title === process.env.GOOGLE_SHEET_TAB_NAME)?.properties?.sheetId;
     if (sheetId !== undefined) {
+      stage = "format worksheet";
       await sheets.spreadsheets.batchUpdate({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
         requestBody: { requests: [
@@ -94,6 +107,7 @@ async function appendToSheet(order) {
     }
   }
   const range = `'${tab}'!A:N`;
+  stage = "append order row";
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
     range,
@@ -107,6 +121,22 @@ async function appendToSheet(order) {
       ]],
     },
   });
+  } catch (error) {
+    error.sheetStage = stage;
+    throw error;
+  }
+}
+
+function safeSheetError(error) {
+  const status = Number(error?.response?.status || error?.status || 0) || undefined;
+  const apiError = error?.response?.data?.error;
+  const apiStatus = typeof apiError?.status === "string" ? apiError.status : undefined;
+  let category = "SHEETS_ERROR";
+  if (status === 403 || apiStatus === "PERMISSION_DENIED") category = "SHEETS_PERMISSION_DENIED";
+  else if (status === 404 || apiStatus === "NOT_FOUND") category = "SHEETS_NOT_FOUND";
+  else if (status === 400 || apiStatus === "INVALID_ARGUMENT") category = "SHEETS_INVALID_REQUEST";
+  else if (["ECONNRESET", "ETIMEDOUT", "ENOTFOUND"].includes(error?.code)) category = "SHEETS_NETWORK_ERROR";
+  return { category, status, stage: error?.sheetStage || "unknown" };
 }
 
 export async function POST(request) {
@@ -216,7 +246,8 @@ export async function POST(request) {
   try {
     await appendToSheet(order);
   } catch (error) {
-    console.error("[order] spreadsheet append failed", { orderId: order.orderId, code: error?.code || "SHEETS_ERROR" });
+    // Keep the log actionable without exposing customer details or credentials.
+    console.error("[order] spreadsheet append failed", { orderId: order.orderId, ...safeSheetError(error) });
     return jsonError("We could not save your order yet. Please try again in a moment.", 502, "SHEET_WRITE_FAILED");
   }
 
