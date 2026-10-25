@@ -15,7 +15,7 @@ export const metadata = {
     type: "website",
     images: ["/temple-set-01.png"],
   },
-  icons: { icon: "/aura-jewels-mark.svg", shortcut: "/aura-jewels-mark.svg", apple: "/aura-jewels-mark.svg" },
+  icons: { icon: "/aura-jewels-mark.png", shortcut: "/aura-jewels-mark.png", apple: "/aura-jewels-mark.png" },
 };
 
 export default function RootLayout({ children }) {

@@ -14,7 +14,7 @@ export default async function ThankYouPage({ searchParams }) {
   return (
     <main className="grid min-h-screen place-items-center bg-cream px-5 py-12">
       <section className="w-full max-w-xl rounded-[2rem] border border-gold/20 bg-white/70 px-6 py-10 text-center shadow-[0_25px_80px_rgba(23,57,47,.1)] sm:px-12 sm:py-14">
-        <Link href="/" aria-label="Aura Jewels home" className="mx-auto mb-6 inline-flex"><Image src="/aura-jewels-logo.svg" alt="Aura Jewels — Bring your story" width={360} height={100} priority className="h-[48px] w-auto" /></Link>
+        <Link href="/" aria-label="Aura Jewels home" className="mx-auto mb-6 inline-flex"><Image src="/aura-jewels-logo.png" alt="Aura Jewels — Shine your story" width={618} height={217} priority className="h-[48px] w-auto" /></Link>
         <span aria-hidden="true" className="mx-auto grid size-16 place-items-center rounded-full border border-gold bg-forest text-2xl text-gold-light">✓</span>
         <p className="mt-7 text-[9px] font-semibold uppercase tracking-[.2em] text-forest/70">{preview ? "Checkout preview" : "Order confirmation"}</p>
         <h1 className="serif mt-3 text-5xl leading-none text-forest sm:text-6xl">{preview ? "Preview complete." : "Thank you for your order!"}</h1>
