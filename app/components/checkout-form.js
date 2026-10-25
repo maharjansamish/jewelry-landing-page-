@@ -62,7 +62,7 @@ export default function CheckoutForm({ productId, initialQuantity }) {
   return (
     <>
       <a className="skip-link" href="#checkout-form">Skip to checkout form</a>
-      <header className="border-b border-gold/20 bg-cream"><div className="mx-auto flex h-[76px] max-w-5xl items-center justify-between px-5 sm:px-8"><Link href="/" className="inline-flex items-center" aria-label="Aura Jewels home"><Image src="/aura-jewels-logo.png" alt="Aura Jewels — Bring your story" width={124} height={55} priority className="h-[54px] w-auto sm:h-[60px]" /></Link><Link href="/" className="text-[10px] font-semibold text-forest underline decoration-gold underline-offset-4">Back to product</Link></div></header>
+      <header className="border-b border-gold/20 bg-cream"><div className="mx-auto flex h-[76px] max-w-5xl items-center justify-between px-5 sm:px-8"><Link href="/" className="inline-flex items-center" aria-label="Aura Jewels home"><Image src="/aura-jewels-logo.svg" alt="Aura Jewels — Bring your story" width={360} height={100} priority className="h-[40px] w-auto sm:h-[44px]" /></Link><Link href="/" className="text-[10px] font-semibold text-forest underline decoration-gold underline-offset-4">Back to product</Link></div></header>
       <main className="min-h-[calc(100vh-140px)] px-5 py-9 sm:px-8 sm:py-14">
         <div className="mx-auto max-w-5xl">
           <p className="mb-3 text-[9px] font-semibold uppercase tracking-[.2em] text-forest/70">Cash on Delivery · No online payment</p>
