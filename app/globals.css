@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #fbf8f1;
+  --color-forest: #17392f;
+  --color-forest-deep: #102b24;
+  --color-gold: #b68a3a;
+  --color-gold-light: #e2c77f;
+  --color-sand: #eee7d9;
+  --color-ink: #29241e;
+  --color-muted: #70695f;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Inter", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body { margin: 0; background: #fbf8f1; color: #29241e; font-family: Inter, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid #b68a3a; outline-offset: 3px; }
+::selection { background: #d8c393; color: #102b24; }
+.skip-link { position: absolute; z-index: 100; top: -5rem; left: 1rem; padding: .8rem 1rem; background: #102b24; color: white; }
+.skip-link:focus { top: 1rem; }
+.serif { font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif; }
+.reel-no-autoplay { scroll-margin-top: 7rem; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
