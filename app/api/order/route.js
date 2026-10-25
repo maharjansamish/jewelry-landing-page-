@@ -113,7 +113,12 @@ export async function POST(request) {
   const nativeForm = /application\/x-www-form-urlencoded|multipart\/form-data/i.test(request.headers.get("content-type") || "");
   const origin = request.headers.get("origin");
   const requestUrl = new URL(request.url);
-  const expectedOrigin = process.env.FRONTEND_URL?.replace(/\/$/, "") || requestUrl.origin;
+  const allowedOrigins = [requestUrl.origin, process.env.FRONTEND_URL, process.env.NEXT_PUBLIC_SITE_URL]
+    .map((value) => {
+      try { return new URL(value).origin; }
+      catch { return null; }
+    })
+    .filter(Boolean);
   let refererOrigin = "";
   try { refererOrigin = new URL(request.headers.get("referer") || "").origin; }
   catch { /* A missing or malformed Referer is not trusted. */ }
@@ -126,7 +131,11 @@ export async function POST(request) {
       return ["localhost", "127.0.0.1", "[::1]"].includes(parsed.hostname) && parsed.port === requestUrl.port;
     } catch { return false; }
   };
-  const sameOriginRequest = origin === expectedOrigin || (nativeForm && refererOrigin === expectedOrigin) || isLocalDevelopmentOrigin(origin);
+  const isAllowedOrigin = (value) => {
+    try { return allowedOrigins.includes(new URL(value).origin); }
+    catch { return false; }
+  };
+  const sameOriginRequest = isAllowedOrigin(origin) || (nativeForm && isAllowedOrigin(refererOrigin)) || isLocalDevelopmentOrigin(origin);
   if (!sameOriginRequest) return jsonError("This order request is not allowed.", 403, "ORIGIN_NOT_ALLOWED");
 
   let payload;
